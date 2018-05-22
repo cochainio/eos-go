@@ -5,8 +5,8 @@ import (
 
 	"flag"
 
-	"github.com/eoscanada/eos-go/ecc"
-	"github.com/eoscanada/eos-go/p2p"
+	"github.com/cochainio/eos-go/ecc"
+	"github.com/cochainio/eos-go/p2p"
 )
 
 var apiAddr = flag.String("api-addr", "http://stage5.testnets.eoscanada.com", "RPC endpoint of the nodeos instance")

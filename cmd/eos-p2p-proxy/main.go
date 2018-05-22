@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/eoscanada/eos-go/p2p"
+	"github.com/cochainio/eos-go/p2p"
 )
 
 func main() {

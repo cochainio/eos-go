@@ -14,7 +14,7 @@ import (
 
 	"io/ioutil"
 
-	"github.com/eoscanada/eos-go/ecc"
+	"github.com/cochainio/eos-go/ecc"
 )
 
 type TransactionHeader struct {

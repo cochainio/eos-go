@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/eoscanada/eos-go/ecc"
+	"github.com/cochainio/eos-go/ecc"
 )
 
 // For reference:

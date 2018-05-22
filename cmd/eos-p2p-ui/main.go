@@ -8,8 +8,8 @@ import (
 
 	"encoding/hex"
 
-	"github.com/eoscanada/eos-go"
-	"github.com/eoscanada/eos-go/p2p"
+	"github.com/cochainio/eos-go"
+	"github.com/cochainio/eos-go/p2p"
 	"github.com/marcusolsson/tui-go"
 )
 

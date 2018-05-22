@@ -1,13 +1,13 @@
 package msig
 
 import (
-	"github.com/eoscanada/eos-go"
+	"github.com/cochainio/eos-go"
 )
 
 func init() {
-	eos.RegisterAction(AN("eosio.msig"), ActN("propose"), &Propose{})
-	eos.RegisterAction(AN("eosio.msig"), ActN("approve"), &Approve{})
-	eos.RegisterAction(AN("eosio.msig"), ActN("unapprove"), &Unapprove{})
-	eos.RegisterAction(AN("eosio.msig"), ActN("cancel"), &Cancel{})
-	eos.RegisterAction(AN("eosio.msig"), ActN("exec"), &Exec{})
+	eos.RegisterAction(eos.AN("eosio.msig"), eos.ActN("propose"), &Propose{})
+	eos.RegisterAction(eos.AN("eosio.msig"), eos.ActN("approve"), &Approve{})
+	eos.RegisterAction(eos.AN("eosio.msig"), eos.ActN("unapprove"), &Unapprove{})
+	eos.RegisterAction(eos.AN("eosio.msig"), eos.ActN("cancel"), &Cancel{})
+	eos.RegisterAction(eos.AN("eosio.msig"), eos.ActN("exec"), &Exec{})
 }

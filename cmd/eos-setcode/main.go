@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/eoscanada/eos-go"
-	"github.com/eoscanada/eos-go/system"
+	"github.com/cochainio/eos-go"
+	"github.com/cochainio/eos-go/system"
 )
 
 var flagAccount = flag.String("account", "", "Account to set code")

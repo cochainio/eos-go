@@ -1,7 +1,7 @@
 EOS.IO API library for Go
 =========================
 
-[![GoDoc](https://godoc.org/github.com/eoscanada/eos-go?status.svg)](https://godoc.org/github.com/eoscanada/eos-go)
+[![GoDoc](https://godoc.org/github.com/cochainio/eos-go?status.svg)](https://godoc.org/github.com/cochainio/eos-go)
 
 This library provides simple access to data structures (binary packing
 and JSON interface) and API calls to an EOS.IO RPC server, running
@@ -29,8 +29,8 @@ fmt.Println("Permission for initn:", accountResp.Permissions[0].RequiredAuth.Key
 ```
 
 `eosio.system` and `eosio.token` contract _Actions_ are respectively in:
-* https://github.com/eoscanada/eos-go/tree/master/system ([godocs](https://godoc.org/github.com/eoscanada/eos-go/system))
-* https://github.com/eoscanada/eos-go/tree/master/token ([godocs](https://godoc.org/github.com/eoscanada/eos-go/token))
+* https://github.com/cochainio/eos-go/tree/master/system ([godocs](https://godoc.org/github.com/cochainio/eos-go/system))
+* https://github.com/cochainio/eos-go/tree/master/token ([godocs](https://godoc.org/github.com/cochainio/eos-go/token))
 
 Example
 -------
