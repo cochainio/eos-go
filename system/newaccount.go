@@ -7,7 +7,10 @@ import (
 
 // NewNewAccount returns a `newaccount` action that lives on the
 // `eosio.system` contract.
-func NewNewAccount(creator, newAccount eos.AccountName, publicKey ecc.PublicKey) *eos.Action {
+func NewNewAccount(creator, newAccount eos.AccountName, ownerKey ecc.PublicKey, activeKey ...ecc.PublicKey) *eos.Action {
+	if len(activeKey) == 0 {
+		activeKey = []ecc.PublicKey{ownerKey}
+	}
 	return &eos.Action{
 		Account: AN("eosio"),
 		Name:    ActN("newaccount"),
@@ -21,7 +24,7 @@ func NewNewAccount(creator, newAccount eos.AccountName, publicKey ecc.PublicKey)
 				Threshold: 1,
 				Keys: []eos.KeyWeight{
 					{
-						PublicKey: publicKey,
+						PublicKey: ownerKey,
 						Weight:    1,
 					},
 				},
@@ -31,7 +34,7 @@ func NewNewAccount(creator, newAccount eos.AccountName, publicKey ecc.PublicKey)
 				Threshold: 1,
 				Keys: []eos.KeyWeight{
 					{
-						PublicKey: publicKey,
+						PublicKey: activeKey[0],
 						Weight:    1,
 					},
 				},
