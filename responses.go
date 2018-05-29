@@ -173,6 +173,7 @@ type PushTransactionFullResp struct {
 	Processed     TransactionProcessed `json:"processed"` // WARN: is an `fc::variant` in server..
 }
 
+// TODO: libraries/chain/include/eosio/chain/trace.hpp: struct transaction_trace
 type TransactionProcessed struct {
 	Status               string        `json:"status"`
 	ID                   SHA256Bytes   `json:"id"`
