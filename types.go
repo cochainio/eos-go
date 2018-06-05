@@ -184,6 +184,20 @@ func (a *Asset) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+type CurrencyStats map[string]struct{
+	Supply Asset `json:"supply"`
+	MaxSupply Asset `json:"max_supply"`
+	Issuer AccountName `json:"issuer"`
+}
+
+func (cs *CurrencyStats) UnmarshalJSON(data []byte) error {
+	err := json.Unmarshal(data, cs)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 type Permission struct {
 	PermName     string    `json:"perm_name"`
 	Parent       string    `json:"parent"`
@@ -283,6 +297,10 @@ func (t *SHA256Bytes) UnmarshalJSON(data []byte) (err error) {
 	return
 }
 
+func (t SHA256Bytes) String() string {
+	return hex.EncodeToString(t)
+}
+
 type Varuint32 uint32
 
 // Tstamp
@@ -337,7 +355,7 @@ func (t *BlockTimestamp) UnmarshalJSON(data []byte) (err error) {
 
 	t.Time, err = time.Parse(`"`+BlockTimestampFormat+`"`, string(data))
 	if err != nil {
-		t.Time, err = time.Parse(`"`+BlockTimestampFormat+`Z07:00"`, string(data))
+		t.Time, err = time.Parse(`"`+BlockTimestampFormat+`Z07:00"`, string(data)) // TODO: Z07?
 	}
 	return err
 }

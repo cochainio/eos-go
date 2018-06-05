@@ -312,6 +312,11 @@ func (api *API) GetCurrencyBalance(account AccountName, symbol string, code Acco
 	return
 }
 
+func (api *API) GetCurrencyStats(symbol string, code AccountName) (out CurrencyStats, err error) {
+	err = api.call("chain", "get_currency_stats", M{"symbol": symbol, "code": code}, &out)
+	return
+}
+
 // See more here: libraries/chain/contracts/abi_serializer.cpp:58...
 
 func (api *API) call(baseAPI string, endpoint string, body interface{}, out interface{}) error {
