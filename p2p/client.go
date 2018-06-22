@@ -8,7 +8,6 @@ import (
 	"sync"
 
 	"encoding/hex"
-	"encoding/json"
 	"log"
 
 	"time"
@@ -59,7 +58,15 @@ type Client struct {
 	api                   *eos.API
 }
 
-func (c *Client) Connect(sync bool, headBlock uint32, headBlockID eos.SHA256Bytes, headBlockTime time.Time, lib uint32, libID eos.SHA256Bytes) (err error) {
+func (c *Client) ConnectRecent() error {
+	return c.connect(false, 0, make([]byte, 32), time.Now(), 0, make([]byte, 32))
+}
+
+func (c *Client) ConnectAndSync(headBlock uint32, headBlockID eos.SHA256Bytes, headBlockTime time.Time, lib uint32, libID eos.SHA256Bytes) error {
+	return c.connect(true, headBlock, headBlockID, headBlockTime, lib, libID)
+}
+
+func (c *Client) connect(sync bool, headBlock uint32, headBlockID eos.SHA256Bytes, headBlockTime time.Time, lib uint32, libID eos.SHA256Bytes) (err error) {
 
 	c.registerInitHandler(sync, headBlock, headBlockID, headBlockTime, lib, libID)
 
@@ -72,7 +79,8 @@ func (c *Client) Connect(sync bool, headBlock uint32, headBlockID eos.SHA256Byte
 
 	println("Connecting to: ", c.p2pAddress)
 	ready := make(chan bool)
-	go c.handleConnection(&Route{From: c.p2pAddress}, ready)
+	errChannel := make(chan error)
+	go c.handleConnection(&Route{From: c.p2pAddress}, ready, errChannel)
 	<-ready
 
 	println("Connected")
@@ -85,7 +93,7 @@ func (c *Client) Connect(sync bool, headBlock uint32, headBlockID eos.SHA256Byte
 		return err
 	}
 
-	return nil
+	return <-errChannel
 }
 
 func (c *Client) RegisterHandler(h Handler) {
@@ -165,8 +173,6 @@ func (c *Client) registerInitHandler(sync bool, headBlock uint32, headBlockID eo
 				log.Println("Failed sending handshake:", err)
 			}
 
-			fmt.Println("Sent handshake:", hInfo)
-
 		case *eos.SignedBlock:
 
 			syncHeadBlock = msg.BlockNumber()
@@ -179,10 +185,15 @@ func (c *Client) registerInitHandler(sync bool, headBlock uint32, headBlockID eo
 					syncing = false
 					sync = false
 					fmt.Println("Sync completed ... Sending handshake")
+					id, err := msg.BlockID()
+					if err != nil {
+						log.Println("blockID: ", err)
+						return
+					}
 					hInfo := &HandshakeInfo{
-						HeadBlockNum:             0,
-						HeadBlockID:              make([]byte, 32, 32),
-						HeadBlockTime:            time.Now(),
+						HeadBlockNum:             msg.BlockNumber(),
+						HeadBlockID:              id,
+						HeadBlockTime:            msg.Timestamp.Time,
 						LastIrreversibleBlockNum: 0,
 						LastIrreversibleBlockID:  make([]byte, 32, 32),
 					}
@@ -217,7 +228,6 @@ type HandshakeInfo struct {
 }
 
 func (c *Client) SendHandshake(info *HandshakeInfo) (err error) {
-	fmt.Println("Will send handshake.")
 	publicKey, err := ecc.NewPublicKey("EOS1111111111111111111111111111111114T1Anm")
 	if err != nil {
 		fmt.Println("publicKey : ", err)
@@ -226,7 +236,7 @@ func (c *Client) SendHandshake(info *HandshakeInfo) (err error) {
 
 	tstamp := eos.Tstamp{Time: info.HeadBlockTime}
 
-	fmt.Println("Time from fake: ", tstamp)
+	//fmt.Println("Time from fake: ", tstamp)
 	//tData, err := eos.MarshalBinary(&tstamp)
 	//if err != nil {
 	//	return fmt.Errorf("marshalling tstamp, %s", err)
@@ -287,19 +297,10 @@ func (c *Client) SendSyncRequest(startBlockNum uint32, endBlockNumber uint32) (e
 }
 
 func (c *Client) sendMessage(message eos.P2PMessage) (err error) {
-	n, _ := message.GetType().Name()
-	fmt.Printf("Sending message [%s] to server\n", n)
 
 	envelope := &eos.P2PMessageEnvelope{
 		Type:       message.GetType(),
 		P2PMessage: message,
-	}
-
-	jsonData, err := json.Marshal(&message)
-	if err != nil {
-		fmt.Println("sending json :", err)
-	} else {
-		fmt.Println("sending json :", string(jsonData))
 	}
 
 	encoder := eos.NewEncoder(c.Conn)
@@ -308,7 +309,7 @@ func (c *Client) sendMessage(message eos.P2PMessage) (err error) {
 	return
 }
 
-func (c *Client) handleConnection(route *Route, ready chan bool) {
+func (c *Client) handleConnection(route *Route, ready chan bool, errChannel chan error) {
 
 	r := bufio.NewReader(c.Conn)
 
@@ -318,7 +319,7 @@ func (c *Client) handleConnection(route *Route, ready chan bool) {
 		envelope, err := eos.ReadP2PMessageData(r)
 		if err != nil {
 			log.Println("Error reading from p2p client:", err)
-			// TODO: kill the socket, do something !
+			errChannel <- err
 			return
 		}
 

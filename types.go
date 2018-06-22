@@ -3,6 +3,7 @@ package eos
 import (
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -26,9 +27,9 @@ func ActN(in string) ActionName   { return ActionName(in) }
 func PN(in string) PermissionName { return PermissionName(in) }
 
 type AccountResourceLimit struct {
-	Used      int64  `json:"used"`
-	Available string `json:"available"`
-	Max       string `json:"max"`
+	Used      JSONInt64 `json:"used"`
+	Available JSONInt64 `json:"available"`
+	Max       JSONInt64 `json:"max"`
 }
 
 type DelegatedBandwidth struct {
@@ -42,16 +43,16 @@ type TotalResources struct {
 	Owner     AccountName `json:"owner"`
 	NetWeight Asset       `json:"net_weight"`
 	CPUWeight Asset       `json:"cpu_weight"`
-	RAMBytes  uint64      `json:"ram_bytes"`
+	RAMBytes  JSONInt64   `json:"ram_bytes"`
 }
 
 type VoterInfo struct {
 	Owner             AccountName    `json:"owner"`
 	Proxy             AccountName    `json:"proxy"`
 	Producers         []AccountName  `json:"producers"`
-	Staked            string         `json:"staked"`
-	LastVoteWeight    string         `json:"last_vote_weight"`
-	ProxiedVoteWeight string         `json:"proxied_vote_weight"`
+	Staked            JSONInt64      `json:"staked"`
+	LastVoteWeight    JSONFloat64    `json:"last_vote_weight"`
+	ProxiedVoteWeight JSONFloat64    `json:"proxied_vote_weight"`
 	IsProxy           byte           `json:"is_proxy"`
 	DeferredTrxID     uint32         `json:"deferred_trx_id"`
 	LastUnstakeTime   BlockTimestamp `json:"last_unstake_time"`
@@ -114,6 +115,23 @@ func (a Asset) Sub(other Asset) Asset {
 		panic("Sub applies only to assets with the same symbol")
 	}
 	return Asset{Amount: a.Amount - other.Amount, Symbol: a.Symbol}
+}
+
+func (a Asset) String() string {
+	strInt := fmt.Sprintf("%d", a.Amount)
+	if len(strInt) < int(a.Symbol.Precision+1) {
+		// prepend `0` for the difference:
+		strInt = strings.Repeat("0", int(a.Symbol.Precision+uint8(1))-len(strInt)) + strInt
+	}
+
+	var result string
+	if a.Symbol.Precision == 0 {
+		result = strInt
+	} else {
+		result = strInt[:len(strInt)-int(a.Symbol.Precision)] + "." + strInt[len(strInt)-int(a.Symbol.Precision):]
+	}
+
+	return fmt.Sprintf("%s %s", result, a.Symbol.Symbol)
 }
 
 // NOTE: there's also a new ExtendedSymbol (which includes the contract (as AccountName) on which it is)
@@ -209,6 +227,34 @@ type PermissionLevel struct {
 	Permission PermissionName `json:"permission"`
 }
 
+// NewPermissionLevel parses strings like `account@active`,
+// `otheraccount@owner` and builds a PermissionLevel struct. It
+// validates that there is a single optional @ (where permission
+// defaults to 'active'), and validates length of account and
+// permission names.
+func NewPermissionLevel(in string) (out PermissionLevel, err error) {
+	parts := strings.Split(in, "@")
+	if len(parts) > 2 {
+		return out, fmt.Errorf("permission %q invalid, use account[@permission]", in)
+	}
+
+	if len(parts[0]) > 12 {
+		return out, fmt.Errorf("account name %q too long", parts[0])
+	}
+
+	out.Actor = AccountName(parts[0])
+	out.Permission = PermissionName("active")
+	if len(parts) == 2 {
+		if len(parts[1]) > 12 {
+			return out, fmt.Errorf("permission %q name too long", parts[1])
+		}
+
+		out.Permission = PermissionName(parts[1])
+	}
+
+	return
+}
+
 type PermissionLevelWeight struct {
 	Permission PermissionLevel `json:"permission"`
 	Weight     uint16          `json:"weight"` // weight_type
@@ -235,6 +281,11 @@ type GetCodeResp struct {
 	AccountName AccountName `json:"account_name"`
 	CodeHash    string      `json:"code_hash"`
 	WASM        string      `json:"wasm"`
+	ABI         ABI         `json:"abi"`
+}
+
+type GetABIResp struct {
+	AccountName AccountName `json:"account_name"`
 	ABI         ABI         `json:"abi"`
 }
 
@@ -358,4 +409,70 @@ func (t *BlockTimestamp) UnmarshalJSON(data []byte) (err error) {
 		t.Time, err = time.Parse(`"`+BlockTimestampFormat+`Z07:00"`, string(data)) // TODO: Z07?
 	}
 	return err
+}
+
+type JSONFloat64 float64
+
+func (f *JSONFloat64) UnmarshalJSON(data []byte) error {
+	if len(data) == 0 {
+		return errors.New("empty value")
+	}
+
+	if data[0] == '"' {
+		var s string
+		if err := json.Unmarshal(data, &s); err != nil {
+			return err
+		}
+
+		val, err := strconv.ParseFloat(s, 64)
+		if err != nil {
+			return err
+		}
+
+		*f = JSONFloat64(val)
+
+		return nil
+	}
+
+	var fl float64
+	if err := json.Unmarshal(data, &fl); err != nil {
+		return err
+	}
+
+	*f = JSONFloat64(fl)
+
+	return nil
+}
+
+type JSONInt64 int64
+
+func (i *JSONInt64) UnmarshalJSON(data []byte) error {
+	if len(data) == 0 {
+		return errors.New("empty value")
+	}
+
+	if data[0] == '"' {
+		var s string
+		if err := json.Unmarshal(data, &s); err != nil {
+			return err
+		}
+
+		val, err := strconv.ParseInt(s, 10, 64)
+		if err != nil {
+			return err
+		}
+
+		*i = JSONInt64(val)
+
+		return nil
+	}
+
+	var v int64
+	if err := json.Unmarshal(data, &v); err != nil {
+		return err
+	}
+
+	*i = JSONInt64(v)
+
+	return nil
 }
