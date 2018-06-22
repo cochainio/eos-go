@@ -57,7 +57,7 @@ type BlockResp struct {
 // }
 
 type TransactionResp struct {
-	ID      SHA256Bytes `json:"id"`
+	ID SHA256Bytes `json:"id"`
 	Receipt struct {
 		Status            TransactionStatus `json:"status"`
 		CPUUsageMicrosec  int               `json:"cpu_usage_us"`
@@ -106,20 +106,21 @@ type ProducerChange struct {
 }
 
 type AccountResp struct {
-	AccountName        AccountName          `json:"account_name"`
-	Privileged         bool                 `json:"privileged"`
-	LastCodeUpdate     JSONTime             `json:"last_code_update"`
-	Created            JSONTime             `json:"created"`
-	RAMQuota           int64                `json:"ram_quota"`
-	RAMUsage           int64                `json:"ram_usage"`
-	NetWeight          JSONInt64            `json:"net_weight"`
-	CPUWeight          JSONInt64            `json:"cpu_weight"`
-	NetLimit           AccountResourceLimit `json:"net_limit"`
-	CPULimit           AccountResourceLimit `json:"cpu_limit"`
-	Permissions        []Permission         `json:"permissions"`
-	TotalResources     TotalResources       `json:"total_resources"`
-	DelegatedBandwidth DelegatedBandwidth   `json:"delegated_bandwidth"`
-	VoterInfo          VoterInfo            `json:"voter_info"`
+	AccountName            AccountName          `json:"account_name"`
+	Privileged             bool                 `json:"privileged"`
+	LastCodeUpdate         JSONTime             `json:"last_code_update"`
+	Created                JSONTime             `json:"created"`
+	RAMQuota               int64                `json:"ram_quota"`
+	RAMUsage               int64                `json:"ram_usage"`
+	NetWeight              JSONInt64            `json:"net_weight"`
+	CPUWeight              JSONInt64            `json:"cpu_weight"`
+	NetLimit               AccountResourceLimit `json:"net_limit"`
+	CPULimit               AccountResourceLimit `json:"cpu_limit"`
+	Permissions            []Permission         `json:"permissions"`
+	TotalResources         TotalResources       `json:"total_resources"`
+	SelfDelegatedBandwidth DelegatedBandwidth   `json:"self_delegated_bandwidth"`
+	RefundRequest          RefundRequest        `json:"refund_request "`
+	VoterInfo              VoterInfo            `json:"voter_info"`
 }
 
 type CurrencyBalanceResp struct {

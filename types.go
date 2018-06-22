@@ -46,6 +46,13 @@ type TotalResources struct {
 	RAMBytes  JSONInt64   `json:"ram_bytes"`
 }
 
+type RefundRequest struct {
+	Owner       AccountName `json:"owner"`
+	RequestTime JSONTime    `json:"request_time"`
+	NetAmount   Asset       `json:"net_amount"`
+	CPUAmount   Asset       `json:"cpu_amount"`
+}
+
 type VoterInfo struct {
 	Owner             AccountName    `json:"owner"`
 	Proxy             AccountName    `json:"proxy"`
@@ -54,9 +61,9 @@ type VoterInfo struct {
 	LastVoteWeight    JSONFloat64    `json:"last_vote_weight"`
 	ProxiedVoteWeight JSONFloat64    `json:"proxied_vote_weight"`
 	IsProxy           byte           `json:"is_proxy"`
-	DeferredTrxID     uint32         `json:"deferred_trx_id"`
-	LastUnstakeTime   BlockTimestamp `json:"last_unstake_time"`
-	Unstaking         Asset          `json:"unstaking"`
+	DeferredTrxID     uint32         `json:"deferred_trx_id"`   // now reserved in mainnet
+	LastUnstakeTime   BlockTimestamp `json:"last_unstake_time"` // now reserved in mainnet
+	Unstaking         Asset          `json:"unstaking"`         // now reserved in mainnet
 }
 
 type CompressionType uint8
@@ -202,10 +209,10 @@ func (a *Asset) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-type CurrencyStats map[string]struct{
-	Supply Asset `json:"supply"`
-	MaxSupply Asset `json:"max_supply"`
-	Issuer AccountName `json:"issuer"`
+type CurrencyStats map[string]struct {
+	Supply    Asset       `json:"supply"`
+	MaxSupply Asset       `json:"max_supply"`
+	Issuer    AccountName `json:"issuer"`
 }
 
 func (cs *CurrencyStats) UnmarshalJSON(data []byte) error {
