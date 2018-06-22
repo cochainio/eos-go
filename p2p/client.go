@@ -14,8 +14,8 @@ import (
 
 	"math"
 
-	"github.com/eoscanada/eos-go"
-	"github.com/eoscanada/eos-go/ecc"
+	"github.com/cochainio/eos-go"
+	"github.com/cochainio/eos-go/ecc"
 )
 
 type loggerWriter struct {
