@@ -341,6 +341,11 @@ func (api *API) GetCurrencyStats(symbol string, code AccountName) (out CurrencyS
 	return
 }
 
+func (api *API) GetAccountsForKey(publicKey string) (out *AccountsForKey, err error) {
+	err = api.call("history", "get_key_accounts", M{"public_key": publicKey}, &out)
+	return
+}
+
 // See more here: libraries/chain/contracts/abi_serializer.cpp:58...
 
 func (api *API) call(baseAPI string, endpoint string, body interface{}, out interface{}) error {

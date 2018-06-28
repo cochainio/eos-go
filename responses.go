@@ -304,3 +304,7 @@ type Producer struct {
 type ProducersResp struct {
 	Producers []Producer `json:"producers"`
 }
+
+type AccountsForKey struct {
+	AccountNames []AccountName `json:"account_names"`
+}
