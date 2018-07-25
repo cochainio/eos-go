@@ -172,6 +172,11 @@ func (d *Decoder) Decode(v interface{}) (err error) {
 		r, err = d.readBool()
 		rv.SetBool(r)
 		return
+	case *Bool:
+		var r bool
+		r, err = d.readBool()
+		rv.SetBool(r)
+		return
 	case *HexBytes:
 		var data []byte
 		data, err = d.readByteArray()
@@ -240,7 +245,7 @@ func (d *Decoder) Decode(v interface{}) (err error) {
 				return
 			}
 
-			trx := TransactionWithID{ID: &id}
+			trx := TransactionWithID{ID: id}
 			rv.Set(reflect.ValueOf(trx))
 			return nil
 
@@ -459,6 +464,7 @@ func (d *Decoder) readUint16() (out uint16, err error) {
 
 	out = binary.LittleEndian.Uint16(d.data[d.pos:])
 	d.pos += TypeSize.UInt16
+	println(fmt.Sprintf("readUint16 [%d]", out))
 	return
 }
 
@@ -573,6 +579,7 @@ func (d *Decoder) readBlockTimestamp() (out BlockTimestamp, err error) {
 func (d *Decoder) readJSONTime() (jsonTime JSONTime, err error) {
 	n, err := d.readUint32()
 	jsonTime = JSONTime{time.Unix(int64(n), 0).UTC()}
+	println("readJSONTime: ", jsonTime)
 	return
 }
 

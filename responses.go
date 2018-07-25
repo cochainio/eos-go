@@ -3,6 +3,7 @@ package eos
 import (
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"reflect"
 
 	"github.com/cochainio/eos-go/ecc"
@@ -35,10 +36,10 @@ type InfoResp struct {
 	HeadBlockTime            JSONTime    `json:"head_block_time"`             //  "2018-02-02T04:19:32"
 	HeadBlockProducer        AccountName `json:"head_block_producer"`         // "inita"
 
-	VirtualBlockCPULimit uint64 `json:"virtual_block_cpu_limit"`
-	VirtualBlockNetLimit uint64 `json:"virtual_block_net_limit"`
-	BlockCPULimit        uint64 `json:"block_cpu_limit"`
-	BlockNetLimit        uint64 `json:"block_net_limit"`
+	VirtualBlockCPULimit JSONInt64 `json:"virtual_block_cpu_limit"`
+	VirtualBlockNetLimit JSONInt64 `json:"virtual_block_net_limit"`
+	BlockCPULimit        JSONInt64 `json:"block_cpu_limit"`
+	BlockNetLimit        JSONInt64 `json:"block_net_limit"`
 }
 
 type BlockResp struct {
@@ -56,6 +57,16 @@ type BlockResp struct {
 // 	Trx           []json.RawMessage `json:"trx"`
 // }
 
+type DBSizeResp struct {
+	FreeBytes JSONInt64 `json:"free_bytes"`
+	UsedBytes JSONInt64 `json:"used_bytes"`
+	Size      JSONInt64 `json:"size"`
+	Indices   []struct {
+		Index    string    `json:"index"`
+		RowCount JSONInt64 `json:"row_count"`
+	} `json:"indices"`
+}
+
 type TransactionResp struct {
 	ID SHA256Bytes `json:"id"`
 	Receipt struct {
@@ -68,29 +79,65 @@ type TransactionResp struct {
 	BlockTime             JSONTime             `json:"block_time"`
 	BlockNum              uint32               `json:"block_num"`
 	LastIrreversibleBlock uint32               `json:"last_irreversible_block"`
-	Traces                []TransactionTrace   `json:"traces"`
+	Traces                []ActionTrace        `json:"traces"`
 }
 
 type ProcessedTransaction struct {
 	Transaction SignedTransaction `json:"trx"`
 }
 
-type TransactionTrace struct {
+type ActionTrace struct {
 	Receipt struct {
-		Receiver        AccountName `json:"receiver"`
-		GlobalSequence  int         `json:"global_sequence"`
-		ReceiveSequence int         `json:"recv_sequence"`
-		// AuthSequence.. complex..
-		CodeSequence int `json:"code_sequence"`
-		ABISequence  int `json:"abi_sequence"`
+		Receiver        AccountName                    `json:"receiver"`
+		ActionDigest    string                         `json:"act_digest"`
+		GlobalSequence  int64                          `json:"global_sequence"`
+		ReceiveSequence int64                          `json:"recv_sequence"`
+		AuthSequence    []TransactionTraceAuthSequence `json:"auth_sequence"` // [["account", sequence], ["account", sequence]]
+		CodeSequence    int64                          `json:"code_sequence"`
+		ABISequence     int64                          `json:"abi_sequence"`
 	} `json:"receipt"`
-	Action        Action      `json:"act"`
-	Elapsed       int         `json:"elapsed"`
-	CPUUsage      int         `json:"cpu_usage"`
-	Console       string      `json:"console"`
-	TotalCPUUsage int         `json:"total_cpu_usage"`
-	TransactionID SHA256Bytes `json:"trx_id"`
-	// InlineTraces ??
+	Action        *Action        `json:"act"`
+	Elapsed       int            `json:"elapsed"`
+	CPUUsage      int            `json:"cpu_usage"`
+	Console       string         `json:"console"`
+	TotalCPUUsage int            `json:"total_cpu_usage"`
+	TransactionID SHA256Bytes    `json:"trx_id"`
+	InlineTraces  []*ActionTrace `json:"inline_traces"`
+}
+
+type TransactionTraceAuthSequence struct {
+	Account  AccountName
+	Sequence int64
+}
+
+// [ ["account", 123123], ["account2", 345] ]
+func (auth *TransactionTraceAuthSequence) UnmarshalJSON(data []byte) error {
+	var ins []interface{}
+	if err := json.Unmarshal(data, &ins); err != nil {
+		return err
+	}
+
+	if len(ins) != 2 {
+		return fmt.Errorf("expected 2 items, received %d", len(ins))
+	}
+
+	account, ok := ins[0].(string)
+	if !ok {
+		return fmt.Errorf("expected 1st item to be a string (account name)")
+	}
+
+	seq, ok := ins[1].(float64)
+	if !ok {
+		return fmt.Errorf("expected 2nd item to be a sequence number (float64)")
+	}
+
+	*auth = TransactionTraceAuthSequence{AccountName(account), int64(seq)}
+
+	return nil
+}
+
+func (auth TransactionTraceAuthSequence) MarshalJSON() (data []byte, err error) {
+	return json.Marshal([]interface{}{auth.Account, auth.Sequence})
 }
 
 type SequencedTransactionResp struct {
@@ -110,6 +157,7 @@ type AccountResp struct {
 	Privileged             bool                 `json:"privileged"`
 	LastCodeUpdate         JSONTime             `json:"last_code_update"`
 	Created                JSONTime             `json:"created"`
+	CoreLiquidBalance      Asset                `json:"core_liquid_balance"`
 	RAMQuota               int64                `json:"ram_quota"`
 	RAMUsage               int64                `json:"ram_usage"`
 	NetWeight              JSONInt64            `json:"net_weight"`
@@ -119,7 +167,7 @@ type AccountResp struct {
 	Permissions            []Permission         `json:"permissions"`
 	TotalResources         TotalResources       `json:"total_resources"`
 	SelfDelegatedBandwidth DelegatedBandwidth   `json:"self_delegated_bandwidth"`
-	RefundRequest          RefundRequest        `json:"refund_request "`
+	RefundRequest          *RefundRequest       `json:"refund_request"`
 	VoterInfo              VoterInfo            `json:"voter_info"`
 }
 
@@ -202,13 +250,13 @@ type PushTransactionFullResp struct {
 
 // TODO: libraries/chain/include/eosio/chain/trace.hpp: struct transaction_trace
 type TransactionProcessed struct {
-	Status               string        `json:"status"`
-	ID                   SHA256Bytes   `json:"id"`
-	ActionTraces         []ActionTrace `json:"action_traces"`
-	DeferredTransactions []string      `json:"deferred_transactions"` // that's not right... dig to find what's there..
+	Status               string      `json:"status"`
+	ID                   SHA256Bytes `json:"id"`
+	ActionTraces         []Trace     `json:"action_traces"`
+	DeferredTransactions []string    `json:"deferred_transactions"` // that's not right... dig to find what's there..
 }
 
-type ActionTrace struct {
+type Trace struct {
 	Receiver AccountName `json:"receiver"`
 	// Action     Action       `json:"act"` // FIXME: how do we unpack that ? what's on the other side anyway?
 	Console    string       `json:"console"`

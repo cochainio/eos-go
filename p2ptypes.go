@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"encoding/binary"
+	"encoding/hex"
 	"encoding/json"
 
 	"github.com/cochainio/eos-go/ecc"
@@ -251,7 +252,7 @@ type TransactionReceipt struct {
 }
 
 type TransactionWithID struct {
-	ID     *SHA256Bytes
+	ID     SHA256Bytes
 	Packed *PackedTransaction
 }
 
@@ -269,7 +270,25 @@ func (t *TransactionWithID) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		*t = TransactionWithID{
+			ID:     packed.ID(),
 			Packed: &packed,
+		}
+
+		return nil
+	} else if data[0] == '"' {
+		var id string
+		err := json.Unmarshal(data, &id)
+		if err != nil {
+			return err
+		}
+
+		shaID, err := hex.DecodeString(id)
+		if err != nil {
+			return fmt.Errorf("decoding id in trx: %s", err)
+		}
+
+		*t = TransactionWithID{
+			ID: SHA256Bytes(shaID),
 		}
 
 		return nil
@@ -285,16 +304,33 @@ func (t *TransactionWithID) UnmarshalJSON(data []byte) error {
 		return fmt.Errorf("expected two params for TransactionWithID, got %d", len(in))
 	}
 
-	// ignore the ID field right now..
-	err = json.Unmarshal(in[1], &packed)
-	if err != nil {
-		return err
-	}
+	typ := string(in[0])
+	switch typ {
+	case "0":
+		var s string
+		if err := json.Unmarshal(in[1], &s); err != nil {
+			return err
+		}
 
-	*t = TransactionWithID{
-		Packed: &packed,
-	}
+		*t = TransactionWithID{}
+		if err := json.Unmarshal(in[1], &t.ID); err != nil {
+			return err
+		}
+	case "1":
 
+		// ignore the ID field right now..
+		err = json.Unmarshal(in[1], &packed)
+		if err != nil {
+			return err
+		}
+
+		*t = TransactionWithID{
+			ID:     packed.ID(),
+			Packed: &packed,
+		}
+	default:
+		return fmt.Errorf("unsupported multi-variant trx serialization type from C++ code into Go: %q", typ)
+	}
 	return nil
 }
 

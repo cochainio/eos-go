@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 	"time"
@@ -46,24 +47,21 @@ type TotalResources struct {
 	RAMBytes  JSONInt64   `json:"ram_bytes"`
 }
 
-type RefundRequest struct {
-	Owner       AccountName `json:"owner"`
-	RequestTime JSONTime    `json:"request_time"`
-	NetAmount   Asset       `json:"net_amount"`
-	CPUAmount   Asset       `json:"cpu_amount"`
+type VoterInfo struct {
+	Owner             AccountName   `json:"owner"`
+	Proxy             AccountName   `json:"proxy"`
+	Producers         []AccountName `json:"producers"`
+	Staked            JSONInt64     `json:"staked"`
+	LastVoteWeight    JSONFloat64   `json:"last_vote_weight"`
+	ProxiedVoteWeight JSONFloat64   `json:"proxied_vote_weight"`
+	IsProxy           byte          `json:"is_proxy"`
 }
 
-type VoterInfo struct {
-	Owner             AccountName    `json:"owner"`
-	Proxy             AccountName    `json:"proxy"`
-	Producers         []AccountName  `json:"producers"`
-	Staked            JSONInt64      `json:"staked"`
-	LastVoteWeight    JSONFloat64    `json:"last_vote_weight"`
-	ProxiedVoteWeight JSONFloat64    `json:"proxied_vote_weight"`
-	IsProxy           byte           `json:"is_proxy"`
-	DeferredTrxID     uint32         `json:"deferred_trx_id"`   // now reserved in mainnet
-	LastUnstakeTime   BlockTimestamp `json:"last_unstake_time"` // now reserved in mainnet
-	Unstaking         Asset          `json:"unstaking"`         // now reserved in mainnet
+type RefundRequest struct {
+	Owner       AccountName `json:"owner"`
+	RequestTime JSONTime    `json:"request_time"` //         {"name":"request_time", "type":"time_point_sec"},
+	NetAmount   Asset       `json:"net_amount"`
+	CPUAmount   Asset       `json:"cpu_amount"`
 }
 
 type CompressionType uint8
@@ -89,7 +87,13 @@ func (c CompressionType) MarshalJSON() ([]byte, error) {
 }
 
 func (c *CompressionType) UnmarshalJSON(data []byte) error {
-	switch string(data) {
+	var s string
+	err := json.Unmarshal(data, &s)
+	if err != nil {
+		return err
+	}
+
+	switch s {
 	case "zlib":
 		*c = CompressionZlib
 	default:
@@ -101,6 +105,25 @@ func (c *CompressionType) UnmarshalJSON(data []byte) error {
 // CurrencyName
 
 type CurrencyName string
+
+type Bool bool
+
+func (b *Bool) UnmarshalJSON(data []byte) error {
+	var num int
+	err := json.Unmarshal(data, &num)
+	if err == nil {
+		*b = Bool(num != 0)
+		return nil
+	}
+
+	var boolVal bool
+	if err := json.Unmarshal(data, &boolVal); err != nil {
+		return fmt.Errorf("couldn't unmarshal bool as int or true/false: %s", err)
+	}
+
+	*b = Bool(boolVal)
+	return nil
+}
 
 // Asset
 
@@ -152,11 +175,35 @@ type Symbol struct {
 var EOSSymbol = Symbol{Precision: 4, Symbol: "EOS"}
 
 func NewEOSAssetFromString(amount string) (out Asset, err error) {
+	if len(amount) == 0 {
+		return out, fmt.Errorf("cannot be an empty string")
+	}
+
+	if strings.Contains(amount, " EOS") {
+		amount = strings.Replace(amount, " EOS", "", 1)
+	}
+	if !strings.Contains(amount, ".") {
+		val, err := strconv.ParseInt(amount, 10, 64)
+		if err != nil {
+			return out, err
+		}
+		return NewEOSAsset(val * 10000), nil
+	}
+
+	parts := strings.Split(amount, ".")
+	if len(parts) != 2 {
+		return out, fmt.Errorf("cannot have two . in amount")
+	}
+
+	if len(parts[1]) > 4 {
+		return out, fmt.Errorf("EOS has only 4 decimals")
+	}
+
 	val, err := strconv.ParseInt(strings.Replace(amount, ".", "", 1), 10, 64)
 	if err != nil {
 		return out, err
 	}
-	return NewEOSAsset(val), nil
+	return NewEOSAsset(val * int64(math.Pow10(4-len(parts[1])))), nil
 }
 
 func NewEOSAsset(amount int64) Asset {
@@ -221,6 +268,10 @@ func (cs *CurrencyStats) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	return nil
+}
+
+func (a Asset) MarshalJSON() (data []byte, err error) {
+	return json.Marshal(a.String())
 }
 
 type Permission struct {
