@@ -348,11 +348,13 @@ type Producer struct {
 	IsActive      int         `json:"is_active"`
 	URL           string      `json:"url"`
 	UnpaidBlocks  int         `json:"unpaid_blocks"`
-	LastClaimTime JSONFloat64 `json:"last_claim_time"`
+	LastClaimTime JSONUint64 `json:"last_claim_time"`
 	Location      int         `json:"location"`
 }
 type ProducersResp struct {
-	Producers []Producer `json:"producers"`
+	Producers []Producer `json:"rows"`
+	TotalProducerVoteWeight float64 `json:"total_producer_vote_weight"`
+	More string `json:"more"`
 }
 
 type AccountsForKey struct {

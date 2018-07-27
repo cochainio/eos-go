@@ -526,3 +526,36 @@ func (i *JSONInt64) UnmarshalJSON(data []byte) error {
 
 	return nil
 }
+
+type JSONUint64 uint64
+
+func (i *JSONUint64) UnmarshalJSON(data []byte) error {
+	if len(data) == 0 {
+		return errors.New("empty value")
+	}
+
+	if data[0] == '"' {
+		var s string
+		if err := json.Unmarshal(data, &s); err != nil {
+			return err
+		}
+
+		val, err := strconv.ParseUint(s, 10, 64)
+		if err != nil {
+			return err
+		}
+
+		*i = JSONUint64(val)
+
+		return nil
+	}
+
+	var v uint64
+	if err := json.Unmarshal(data, &v); err != nil {
+		return err
+	}
+
+	*i = JSONUint64(v)
+
+	return nil
+}
