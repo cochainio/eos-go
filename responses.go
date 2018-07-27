@@ -180,13 +180,15 @@ type CurrencyBalanceResp struct {
 
 type GetTableRowsRequest struct {
 	JSON       bool   `json:"json"`
-	Scope      string `json:"scope"`
 	Code       string `json:"code"`
+	Scope      string `json:"scope"`
 	Table      string `json:"table"`
-	TableKey   string `json:"table_key"`
+	TableKey   string `json:"table_key,omitempty"` // not used
 	LowerBound string `json:"lower_bound"`
 	UpperBound string `json:"upper_bound"`
 	Limit      uint32 `json:"limit,omitempty"` // defaults to 10 => chain_plugin.hpp:struct get_table_rows_params
+	IndexPosistion string `json:"index_position,omitempty"`
+	KeyType string `json:"key_type,omitempty"`
 }
 
 type GetTableRowsResp struct {
