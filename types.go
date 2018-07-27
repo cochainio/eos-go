@@ -262,14 +262,6 @@ type CurrencyStats map[string]struct {
 	Issuer    AccountName `json:"issuer"`
 }
 
-func (cs *CurrencyStats) UnmarshalJSON(data []byte) error {
-	err := json.Unmarshal(data, cs)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 func (a Asset) MarshalJSON() (data []byte, err error) {
 	return json.Marshal(a.String())
 }
