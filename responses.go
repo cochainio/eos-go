@@ -353,7 +353,7 @@ type Producer struct {
 }
 type ProducersResp struct {
 	Producers []Producer `json:"rows"`
-	TotalProducerVoteWeight float64 `json:"total_producer_vote_weight"`
+	TotalProducerVoteWeight JSONFloat64 `json:"total_producer_vote_weight"`
 	More string `json:"more"`
 }
 
