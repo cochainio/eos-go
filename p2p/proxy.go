@@ -142,7 +142,7 @@ func (p *Proxy) handleConnection(connection net.Conn, forwardConnection net.Conn
 		}
 
 		router <- routeCommunication{
-			Route:                 route,
+			Route: route,
 			DestinationConnection: forwardConnection,
 			Envelope:              envelope,
 		}

@@ -333,14 +333,35 @@ func (api *API) GetBlockByID(id string) (out *BlockResp, err error) {
 	return
 }
 
+func (api *API) GetGlobalState() (out *Global, err error) {
+	r, err := api.GetTableRows(GetTableRowsRequest{
+		JSON:  true,
+		Code:  "eosio",
+		Scope: "eosio",
+		Table: "global",
+	})
+	if err != nil {
+		return
+	}
+	var globals []*Global
+	err = json.Unmarshal(r.Rows, &globals)
+	if err != nil {
+		return
+	}
+	if len(globals) == 0 {
+		err = errors.New("empty global state") // never happen
+	}
+	return globals[0], nil
+}
+
 func (api *API) GetProducers(lower string, limit uint32, json bool) (out *ProducersResp, err error) {
 	/*
 		+FC_REFLECT( eosio::chain_apis::read_only::get_producers_params, (json)(lower_bound)(limit) )
 		+FC_REFLECT( eosio::chain_apis::read_only::get_producers_result, (rows)(total_producer_vote_weight)(more) ); */
 	err = api.call("chain", "get_producers", M{
 		"lower_bound": lower,
-		"limit": limit,
-		"json": json,
+		"limit":       limit,
+		"json":        json,
 	}, &out)
 	return
 }

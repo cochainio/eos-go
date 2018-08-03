@@ -6,8 +6,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/cochainio/eos-go"
+	"github.com/davecgh/go-spew/spew"
 )
 
 func main() {

@@ -68,7 +68,7 @@ type DBSizeResp struct {
 }
 
 type TransactionResp struct {
-	ID SHA256Bytes `json:"id"`
+	ID      SHA256Bytes `json:"id"`
 	Receipt struct {
 		Status            TransactionStatus `json:"status"`
 		CPUUsageMicrosec  int               `json:"cpu_usage_us"`
@@ -179,16 +179,16 @@ type CurrencyBalanceResp struct {
 }
 
 type GetTableRowsRequest struct {
-	JSON       bool   `json:"json"`
-	Code       string `json:"code"`
-	Scope      string `json:"scope"`
-	Table      string `json:"table"`
-	TableKey   string `json:"table_key,omitempty"` // not used
-	LowerBound string `json:"lower_bound"`
-	UpperBound string `json:"upper_bound"`
-	Limit      uint32 `json:"limit,omitempty"` // defaults to 10 => chain_plugin.hpp:struct get_table_rows_params
+	JSON           bool   `json:"json"`
+	Code           string `json:"code"`
+	Scope          string `json:"scope"`
+	Table          string `json:"table"`
+	TableKey       string `json:"table_key,omitempty"` // not used
+	LowerBound     string `json:"lower_bound"`
+	UpperBound     string `json:"upper_bound"`
+	Limit          uint32 `json:"limit,omitempty"` // defaults to 10 => chain_plugin.hpp:struct get_table_rows_params
 	IndexPosistion string `json:"index_position,omitempty"`
-	KeyType string `json:"key_type,omitempty"`
+	KeyType        string `json:"key_type,omitempty"`
 }
 
 type GetTableRowsResp struct {
@@ -342,19 +342,19 @@ type Global struct {
 }
 
 type Producer struct {
-	Owner         string      `json:"owner"`
-	TotalVotes    float64     `json:"total_votes,string"`
-	ProducerKey   string      `json:"producer_key"`
-	IsActive      int         `json:"is_active"`
-	URL           string      `json:"url"`
-	UnpaidBlocks  int         `json:"unpaid_blocks"`
+	Owner         string     `json:"owner"`
+	TotalVotes    float64    `json:"total_votes,string"`
+	ProducerKey   string     `json:"producer_key"`
+	IsActive      int        `json:"is_active"`
+	URL           string     `json:"url"`
+	UnpaidBlocks  int        `json:"unpaid_blocks"`
 	LastClaimTime JSONUint64 `json:"last_claim_time"`
-	Location      int         `json:"location"`
+	Location      int        `json:"location"`
 }
 type ProducersResp struct {
-	Producers []Producer `json:"rows"`
+	Producers               []Producer  `json:"rows"`
 	TotalProducerVoteWeight JSONFloat64 `json:"total_producer_vote_weight"`
-	More string `json:"more"`
+	More                    string      `json:"more"`
 }
 
 type AccountsForKey struct {
