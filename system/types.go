@@ -1,19 +1,8 @@
 package system
 
 import (
-	eos "github.com/cochainio/eos-go"
-	"github.com/cochainio/eos-go/ecc"
+	eos "github.com/eoscanada/eos-go"
 )
-
-// SetProds is present in `eosio.bios` contract. Used only at boot time.
-type SetProds struct {
-	Schedule []ProducerKey `json:"schedule"`
-}
-
-type ProducerKey struct {
-	ProducerName    eos.AccountName `json:"producer_name"`
-	BlockSigningKey ecc.PublicKey   `json:"block_signing_key"`
-}
 
 // BlockchainParameters are all the params we can set through `setparams`.
 type BlockchainParameters struct {
