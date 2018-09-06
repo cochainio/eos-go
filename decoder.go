@@ -626,7 +626,7 @@ func (d *Decoder) readAsset() (out Asset, err error) {
 	return
 }
 
-func (d *Decoder) readActionData(action *Action) (err error) {
+func ReadActionData(action *Action) (err error) {
 
 	actionMap := RegisteredActions[action.Account]
 
@@ -654,6 +654,10 @@ func (d *Decoder) readActionData(action *Action) (err error) {
 	action.ActionData.Data = obj.Interface()
 
 	return
+}
+
+func (d *Decoder) readActionData(action *Action) (err error) {
+	return ReadActionData(action)
 }
 
 func (d *Decoder) readP2PMessageEnvelope() (out *P2PMessageEnvelope, err error) {
