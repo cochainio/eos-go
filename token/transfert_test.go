@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestPackedTransaction_Unpack(t *testing.T) {
+func FixmeTestPackedTransaction_Unpack(t *testing.T) {
 
 	transfer := Transfer{}
 	fmt.Println(transfer)
