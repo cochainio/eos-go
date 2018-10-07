@@ -335,7 +335,7 @@ type Global struct {
 	PervoteBucket                  int       `json:"pervote_bucket"`
 	PerblockBucket                 int       `json:"perblock_bucket"`
 	TotalUnpaidBlocks              int       `json:"total_unpaid_blocks"`
-	TotalActivatedStake            float64   `json:"total_activated_stake,string"`
+	TotalActivatedStake            int64     `json:"total_activated_stake,string"`
 	ThreshActivatedStakeTime       int64     `json:"thresh_activated_stake_time,string"`
 	LastProducerScheduleSize       int       `json:"last_producer_schedule_size"`
 	TotalProducerVoteWeight        float64   `json:"total_producer_vote_weight,string"`
