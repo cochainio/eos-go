@@ -4,7 +4,11 @@ import (
 	eos "github.com/cochainio/eos-go"
 )
 
-func NewBuyRAM(payer, receiver eos.AccountName, eosQuantity uint64) *eos.Action {
+func NewBuyRAMQuantity(payer, receiver eos.AccountName, eosQuantity uint64) *eos.Action {
+	return NewBuyRAM(payer, receiver, eos.NewEOSAsset(int64(eosQuantity)))
+}
+
+func NewBuyRAM(payer, receiver eos.AccountName, asset eos.Asset) *eos.Action {
 	a := &eos.Action{
 		Account: AN("eosio"),
 		Name:    ActN("buyram"),
@@ -14,7 +18,7 @@ func NewBuyRAM(payer, receiver eos.AccountName, eosQuantity uint64) *eos.Action 
 		ActionData: eos.NewActionData(BuyRAM{
 			Payer:    payer,
 			Receiver: receiver,
-			Quantity: eos.NewEOSAsset(int64(eosQuantity)),
+			Quantity: asset,
 		}),
 	}
 	return a
