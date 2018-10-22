@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/hex"
 	"flag"
+	"fmt"
 	"log"
 
 	"encoding/hex"
@@ -9,22 +11,26 @@ import (
 	"github.com/cochainio/eos-go/p2p"
 )
 
-var p2pAddr = flag.String("p2p-addr", "peering.mainnet.eoscanada.com:9876", "P2P socket connection")
-var chainID = flag.String("chain-id", "aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906", "Chain id")
-var networkVersion = flag.Int("network-version", 1206, "Network version")
+var peer = flag.String("peer", "localhost:9876", "peer to connect to")
 
 func main() {
+	flag.Parse()
 
-	chainID, err := hex.DecodeString("9bf6c5d3610260507f3a37340c43ff186c1810c984e9ad0b99b6fb8d6a3c94a3")
+	cID, err := hex.DecodeString("cf057bbfb72640471fd910bcb67639c22df9f92470936cddc1ade0e2f2e7dc4f")
 	if err != nil {
-		log.Fatal("Chain id:", err)
+
+		log.Fatal(err)
 	}
 
+	fmt.Println("P2P Client", *peer)
 	client := p2p.NewClient(
-		p2p.NewOutgoingPeer("localhost:9876", chainID, "eos-proxy", true),
+		p2p.NewOutgoingPeer("localhost:9876", "eos-proxy", &p2p.HandshakeInfo{
+			ChainID:      cID,
+			HeadBlockNum: 1,
+		}),
+		false,
 	)
 
 	client.RegisterHandler(p2p.StringLoggerHandler)
 	client.Start()
-
 }

@@ -130,9 +130,24 @@ func (api *API) GetAccount(name AccountName) (out *AccountResp, err error) {
 	return
 }
 
+func (api *API) GetRawCodeAndABI(account AccountName) (out *GetRawCodeAndABIResp, err error) {
+	err = api.call("chain", "get_raw_code_and_abi", M{"account_name": account}, &out)
+	return
+}
+
 func (api *API) GetCode(account AccountName) (out *GetCodeResp, err error) {
 	err = api.call("chain", "get_code", M{"account_name": account, "code_as_wasm": true}, &out)
 	return
+}
+
+func (api *API) GetCodeHash(account AccountName) (out SHA256Bytes, err error) {
+	resp := GetCodeHashResp{}
+	if err = api.call("chain", "get_code_hash", M{"account_name": account}, &resp); err != nil {
+		return
+	}
+
+	buffer, err := hex.DecodeString(resp.CodeHash)
+	return SHA256Bytes(buffer), err
 }
 
 func (api *API) GetABI(account AccountName) (out *GetABIResp, err error) {
@@ -424,6 +439,17 @@ func (api *API) GetGlobalState() (out *Global, err error) {
 		err = errors.New("empty global state") // never happen
 	}
 	return globals[0], nil
+}
+
+// GetScheduledTransactionsWithBounds returns scheduled transactions within specified bounds
+func (api *API) GetScheduledTransactionsWithBounds(lower_bound string, limit uint32) (out *ScheduledTransactionsResp, err error) {
+	err = api.call("chain", "get_scheduled_transactions", M{"json": true, "lower_bound": lower_bound, "limit": limit}, &out)
+	return
+}
+
+// GetScheduledTransactions returns the Top 100 scheduled transactions
+func (api *API) GetScheduledTransactions() (out *ScheduledTransactionsResp, err error) {
+	return api.GetScheduledTransactionsWithBounds("", 100)
 }
 
 func (api *API) GetProducers(lower string, limit uint32, json bool) (out *ProducersResp, err error) {
