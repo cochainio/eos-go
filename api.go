@@ -510,13 +510,18 @@ func (api *API) GetTableRows(params GetTableRowsRequest) (out *GetTableRowsResp,
 	return
 }
 
-func (api *API) GetRequiredKeys(tx *Transaction) (out *GetRequiredKeysResp, err error) {
-	keys, err := api.Signer.AvailableKeys()
-	if err != nil {
-		return nil, err
+func (api *API) GetRequiredKeys(tx *Transaction, keys ...[]ecc.PublicKey) (out *GetRequiredKeysResp, err error) {
+	var availableKeys []ecc.PublicKey
+	if len(keys) > 0 {
+		availableKeys = keys[0]
+	} else {
+		availableKeys, err = api.Signer.AvailableKeys()
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	err = api.call("chain", "get_required_keys", M{"transaction": tx, "available_keys": keys}, &out)
+	err = api.call("chain", "get_required_keys", M{"transaction": tx, "available_keys": availableKeys}, &out)
 	return
 }
 
