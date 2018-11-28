@@ -19,6 +19,10 @@ func NewSetContract(account eos.AccountName, wasmPath, abiPath string) (out []*e
 		return nil, err
 	}
 
+	return NewSetContractFromBytes(account, codeContent, abiContent)
+}
+
+func NewSetContractFromBytes(account eos.AccountName, codeContent, abiContent []byte) (out []*eos.Action, err error) {
 	var abiDef eos.ABI
 	if err := json.Unmarshal(abiContent, &abiDef); err != nil {
 		return nil, fmt.Errorf("unmarshal ABI file: %s", err)
