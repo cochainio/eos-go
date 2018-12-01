@@ -546,6 +546,16 @@ func (api *API) GetAccountsForKey(publicKey string) (out *AccountsForKey, err er
 
 // See more here: libraries/chain/contracts/abi_serializer.cpp:58...
 
+type ResponseError struct {
+	URL string `json:"url"`
+	StatusCode int `json:"status"`
+	Body string `json:"body"`
+}
+
+func (re *ResponseError) Error() string {
+	return fmt.Sprintf("%s: status code=%d, body=%s", re.URL, re.StatusCode, re.Body)
+}
+
 func (api *API) call(baseAPI string, endpoint string, body interface{}, out interface{}) error {
 	jsonBody, err := enc(body)
 	if err != nil {
@@ -585,7 +595,11 @@ func (api *API) call(baseAPI string, endpoint string, body interface{}, out inte
 		return ErrNotFound
 	}
 	if resp.StatusCode > 299 {
-		return fmt.Errorf("%s: status code=%d, body=%s", req.URL.String(), resp.StatusCode, cnt.String())
+		return &ResponseError{
+			URL: req.URL.String(),
+			StatusCode: resp.StatusCode,
+			Body: cnt.String(),
+		}
 	}
 
 	if api.Debug {
