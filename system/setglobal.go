@@ -1,8 +1,9 @@
 package system
 
 import (
-	"github.com/cochainio/eos-go"
 	"strconv"
+
+	"github.com/cochainio/eos-go"
 )
 
 func NewSetGlobal(name, value string) *eos.Action {
@@ -13,14 +14,14 @@ func NewSetGlobal(name, value string) *eos.Action {
 			{Actor: AN("eosio"), Permission: PN("active")},
 		},
 		ActionData: eos.NewActionData(SetGlobal{
-			Name: name,
+			Name:  name,
 			Value: value,
 		}),
 	}
 }
 
 type SetGlobal struct {
-	Name string `json:"name"`
+	Name  string `json:"name"`
 	Value string `json:"value"`
 }
 

@@ -58,7 +58,7 @@ type Extension struct {
 }
 
 // Fill sets the fields on a transaction.  If you pass `headBlockID`, then `api` can be nil. If you don't pass `headBlockID`, then the `api` is going to be called to fetch
-func (tx *Transaction) Fill(headBlockID SHA256Bytes, delaySecs, maxNetUsageWords uint32, maxCPUUsageMS uint8) {
+func (tx *Transaction) Fill(headBlockID Checksum256, delaySecs, maxNetUsageWords uint32, maxCPUUsageMS uint8) {
 	tx.setRefBlock(headBlockID)
 
 	if tx.ContextFreeActions == nil {
@@ -109,7 +109,7 @@ func (s *SignedTransaction) String() string {
 	return string(data)
 }
 
-func (s *SignedTransaction) SignedByKeys(chainID SHA256Bytes) (out []ecc.PublicKey, err error) {
+func (s *SignedTransaction) SignedByKeys(chainID Checksum256) (out []ecc.PublicKey, err error) {
 	trx, cfd, err := s.PackedTransactionAndCFD()
 	if err != nil {
 		return
@@ -143,7 +143,6 @@ func (s *SignedTransaction) PackedTransactionAndCFD() ([]byte, []byte, error) {
 
 	return rawtrx, rawcfd, nil
 }
-
 
 func (s *SignedTransaction) Pack(compression CompressionType) (*PackedTransaction, error) {
 	rawtrx, rawcfd, err := s.PackedTransactionAndCFD()
@@ -196,10 +195,28 @@ type PackedTransaction struct {
 	PackedTransaction     HexBytes        `json:"packed_trx"`
 }
 
-func (p *PackedTransaction) ID() SHA256Bytes {
+func (p *PackedTransaction) ID() (Checksum256, error) {
 	h := sha256.New()
+
+	if p.Compression == CompressionZlib {
+		var err error
+		zReader, err := zlib.NewReader(bytes.NewBuffer(p.PackedTransaction))
+		if err != nil {
+			return nil, fmt.Errorf("getting zlib reader, %v", err)
+		}
+		defer zReader.Close()
+
+		data, err := ioutil.ReadAll(zReader)
+		if err != nil {
+			return nil, fmt.Errorf("reading all data from zlib, %v", err)
+		}
+
+		_, _ = h.Write(data)
+		return h.Sum(nil), nil
+	}
+
 	_, _ = h.Write(p.PackedTransaction)
-	return h.Sum(nil)
+	return h.Sum(nil), nil
 }
 
 // Unpack decodes the bytestream of the transaction, and attempts to
@@ -275,7 +292,7 @@ type DeferredTransaction struct {
 }
 
 type ScheduledTransaction struct {
-	TransactionID SHA256Bytes `json:"trx_id"`
+	TransactionID Checksum256 `json:"trx_id"`
 	Sender        AccountName `json:"sender"`
 	SenderID      string      `json:"sender_id"`
 	Payer         AccountName `json:"payer"`
@@ -289,8 +306,8 @@ type ScheduledTransaction struct {
 // TxOptions represents options you want to pass to the transaction
 // you're sending.
 type TxOptions struct {
-	ChainID          SHA256Bytes // If specified, we won't hit the API to fetch it
-	HeadBlockID      SHA256Bytes // If provided, don't hit API to fetch it.  This allows offline transaction signing.
+	ChainID          Checksum256 // If specified, we won't hit the API to fetch it
+	HeadBlockID      Checksum256 // If provided, don't hit API to fetch it.  This allows offline transaction signing.
 	MaxNetUsageWords uint32
 	DelaySecs        uint32
 	MaxCPUUsageMS    uint8 // If you want to override the CPU usage (in counts of 1024)

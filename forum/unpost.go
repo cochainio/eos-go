@@ -1,14 +1,14 @@
 package forum
 
 import (
-	eos "github.com/eoscanada/eos-go"
+	eos "github.com/cochainio/eos-go"
 )
 
 // NewUnPost is an action undoing a post that is active
 func NewUnPost(poster eos.AccountName, postUUID string) *eos.Action {
 	a := &eos.Action{
 		Account: ForumAN,
-		Name:    ActN("post"),
+		Name:    ActN("unpost"),
 		Authorization: []eos.PermissionLevel{
 			{Actor: poster, Permission: eos.PermissionName("active")},
 		},
