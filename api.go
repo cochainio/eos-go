@@ -153,8 +153,8 @@ func (api *API) GetRawCodeAndABI(account AccountName) (out *GetRawCodeAndABIResp
 	return
 }
 
-func (api *API) GetCode(account AccountName) (out *GetCodeResp, err error) {
-	err = api.call("chain", "get_code", M{"account_name": account, "code_as_wasm": true}, &out)
+func (api *API) GetCode(account AccountName, codeAsWasm bool) (out *GetCodeResp, err error) {
+	err = api.call("chain", "get_code", M{"account_name": account, "code_as_wasm": codeAsWasm}, &out)
 	return
 }
 

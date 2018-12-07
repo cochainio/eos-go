@@ -352,6 +352,7 @@ type GetCodeResp struct {
 	AccountName AccountName `json:"account_name"`
 	CodeHash    string      `json:"code_hash"`
 	WASM        string      `json:"wasm"`
+	WAST        string      `json:"wast"`
 	ABI         ABI         `json:"abi"`
 }
 
