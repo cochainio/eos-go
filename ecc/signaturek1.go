@@ -36,7 +36,7 @@ func (s *innerK1Signature) publicKey(content []byte, hash []byte) (out PublicKey
 	return PublicKey{
 		Curve:   CurveK1,
 		Content: recoveredKey.SerializeCompressed(),
-		inner:   &innerK1PublicKey{},
+		inner:   innerPublicKey{PublicKeyPrefixCompat},
 	}, nil
 }
 

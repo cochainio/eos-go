@@ -13,7 +13,7 @@ func (k *innerR1PrivateKey) publicKey() PublicKey {
 	var pubKeyData []byte
 	pubKeyData = append(pubKeyData, byte(1))
 	pubKeyData = append(pubKeyData, bytes.Repeat([]byte{0}, 33)...)
-	return PublicKey{Curve: CurveR1, Content: pubKeyData, inner: &innerR1PublicKey{}}
+	return PublicKey{Curve: CurveR1, Content: pubKeyData, inner: innerPublicKey{PublicKeyR1Prefix}}
 }
 
 func (k *innerR1PrivateKey) sign(hash []byte) (out Signature, err error) {

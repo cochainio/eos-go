@@ -12,7 +12,7 @@ type innerK1PrivateKey struct {
 }
 
 func (k *innerK1PrivateKey) publicKey() PublicKey {
-	return PublicKey{Curve: CurveK1, Content: k.privKey.PubKey().SerializeCompressed(), inner: &innerK1PublicKey{}}
+	return PublicKey{Curve: CurveK1, Content: k.privKey.PubKey().SerializeCompressed(), inner: innerPublicKey{PublicKeyPrefixCompat}}
 }
 
 func (k *innerK1PrivateKey) sign(hash []byte) (out Signature, err error) {
