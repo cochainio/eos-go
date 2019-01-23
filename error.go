@@ -2,6 +2,7 @@ package eos
 
 import (
 	"github.com/cochainio/eos-go/eoserr"
+	"fmt"
 )
 
 // APIError represents the errors as reported by the server
@@ -44,5 +45,12 @@ type APIErrorDetail struct {
 }
 
 func (e APIError) Error() string {
-	return e.Message
+	msg := e.Message
+	msg = fmt.Sprintf("%s: %s", msg, e.ErrorStruct.What)
+
+	for _, detail := range e.ErrorStruct.Details {
+		msg = fmt.Sprintf("%s: %s", msg, detail.Message)
+	}
+
+	return msg
 }

@@ -96,11 +96,11 @@ type ActionTrace struct {
 	Receipt struct {
 		Receiver        AccountName                    `json:"receiver"`
 		ActionDigest    string                         `json:"act_digest"`
-		GlobalSequence  int64                          `json:"global_sequence"`
-		ReceiveSequence int64                          `json:"recv_sequence"`
+		GlobalSequence  Uint64                         `json:"global_sequence"`
+		ReceiveSequence Uint64                         `json:"recv_sequence"`
 		AuthSequence    []TransactionTraceAuthSequence `json:"auth_sequence"` // [["account", sequence], ["account", sequence]]
-		CodeSequence    int64                          `json:"code_sequence"`
-		ABISequence     int64                          `json:"abi_sequence"`
+		CodeSequence    Uint64                         `json:"code_sequence"`
+		ABISequence     Uint64                         `json:"abi_sequence"`
 	} `json:"receipt"`
 	Action        *Action        `json:"act"`
 	Elapsed       int            `json:"elapsed"`
@@ -113,7 +113,7 @@ type ActionTrace struct {
 
 type TransactionTraceAuthSequence struct {
 	Account  AccountName
-	Sequence int64
+	Sequence Uint64
 }
 
 // [ ["account", 123123], ["account2", 345] ]
@@ -137,7 +137,7 @@ func (auth *TransactionTraceAuthSequence) UnmarshalJSON(data []byte) error {
 		return fmt.Errorf("expected 2nd item to be a sequence number (float64)")
 	}
 
-	*auth = TransactionTraceAuthSequence{AccountName(account), int64(seq)}
+	*auth = TransactionTraceAuthSequence{AccountName(account), Uint64(seq)}
 
 	return nil
 }
@@ -164,8 +164,8 @@ type AccountResp struct {
 	LastCodeUpdate         JSONTime             `json:"last_code_update"`
 	Created                JSONTime             `json:"created"`
 	CoreLiquidBalance      Asset                `json:"core_liquid_balance"`
-	RAMQuota               int64                `json:"ram_quota"`
-	RAMUsage               int64                `json:"ram_usage"`
+	RAMQuota               Int64                `json:"ram_quota"`
+	RAMUsage               Int64                `json:"ram_usage"`
 	NetWeight              Int64                `json:"net_weight"`
 	CPUWeight              Int64                `json:"cpu_weight"`
 	NetLimit               AccountResourceLimit `json:"net_limit"`
@@ -182,6 +182,19 @@ type CurrencyBalanceResp struct {
 	StakedBalance     Asset    `json:"staked_balance"`
 	UnstakingBalance  Asset    `json:"unstaking_balance"`
 	LastUnstakingTime JSONTime `json:"last_unstaking_time"`
+}
+
+type GetTableByScopeRequest struct {
+	Code       string `json:"code"`
+	Table      string `json:"table"`
+	LowerBound string `json:"lower_bound,omitempty"`
+	UpperBound string `json:"upper_bound,omitempty"`
+	Limit      uint32 `json:"limit,omitempty"`
+}
+
+type GetTableByScopeResp struct {
+	More bool            `json:"more"`
+	Rows json.RawMessage `json:"rows"`
 }
 
 type GetTableRowsRequest struct {
@@ -252,6 +265,18 @@ type GetIntegrityHashResp struct {
 type Currency struct {
 	Precision uint8
 	Name      CurrencyName
+}
+
+type GetRawABIRequest struct {
+	AccountName string      `json:"account_name"`
+	ABIHash     Checksum256 `json:"abi_hash,omitempty"`
+}
+
+type GetRawABIResp struct {
+	AccountName string      `json:"account_name"`
+	CodeHash    Checksum256 `json:"code_hash"`
+	ABIHash     Checksum256 `json:"abi_hash"`
+	ABI         Blob        `json:"abi"`
 }
 
 type GetRequiredKeysResp struct {
@@ -384,8 +409,8 @@ type GetActionsRequest struct {
 	Offset      int64       `json:"offset"`
 }
 type ActionResp struct {
-	GlobalSeq  int64       `json:"global_action_seq"`
-	AccountSeq int64       `json:"account_action_seq"`
+	GlobalSeq  JSONInt64   `json:"global_action_seq"`
+	AccountSeq JSONInt64   `json:"account_action_seq"`
 	BlockNum   uint32      `json:"block_num"`
 	BlockTime  JSONTime    `json:"block_time"`
 	Trace      ActionTrace `json:"action_trace"`
@@ -393,4 +418,10 @@ type ActionResp struct {
 type ActionsResp struct {
 	Actions               []ActionResp `json:"actions"`
 	LastIrreversibleBlock uint32       `json:"last_irreversible_block"`
+}
+
+type GetCurrencyStatsResp struct {
+	Supply    Asset       `json:"supply"`
+	MaxSupply Asset       `json:"max_supply"`
+	Issuer    AccountName `json:"issuer"`
 }
