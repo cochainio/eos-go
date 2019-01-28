@@ -196,6 +196,8 @@ type PackedTransaction struct {
 	PackedTransaction     HexBytes        `json:"packed_trx"`
 
 	wasPackedLocally bool
+
+	unpacked *SignedTransaction
 }
 
 // ID returns the hash of a transaction.
@@ -234,6 +236,10 @@ func (p *PackedTransaction) UnpackBare() (signedTx *SignedTransaction, err error
 }
 
 func (p *PackedTransaction) unpack(bare bool) (signedTx *SignedTransaction, err error) {
+	if p.unpacked != nil {
+		return p.unpacked, nil
+	}
+
 	var txReader io.Reader
 	txReader = bytes.NewBuffer(p.PackedTransaction)
 
@@ -281,6 +287,8 @@ func (p *PackedTransaction) unpack(bare bool) (signedTx *SignedTransaction, err 
 	//signedTx.ContextFreeData = contextFreeData
 	signedTx.Signatures = p.Signatures
 	signedTx.packed = p
+
+	p.unpacked = signedTx
 
 	return
 }
