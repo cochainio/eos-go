@@ -57,6 +57,7 @@ type VoterInfo struct {
 	LastVoteWeight    JSONFloat64   `json:"last_vote_weight"`
 	ProxiedVoteWeight JSONFloat64   `json:"proxied_vote_weight"`
 	IsProxy           byte          `json:"is_proxy"`
+	LastChangeTime    JSONTime      `json:"last_change_time"` // only valid for eoscochain
 }
 
 type RefundRequest struct {
@@ -182,6 +183,10 @@ type ExtendedAsset struct {
 type Symbol struct {
 	Precision uint8
 	Symbol    string
+}
+
+func (s Symbol) String() string {
+	return fmt.Sprintf("%d,%s", s.Precision, s.Symbol)
 }
 
 type SymbolCode uint64

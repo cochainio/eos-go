@@ -372,16 +372,16 @@ type Global struct {
 	MaxRAMSize                     string      `json:"max_ram_size"`
 	TotalRAMBytesReserved          Int64       `json:"total_ram_bytes_reserved"`
 	TotalRAMStake                  Int64       `json:"total_ram_stake"`
-	LastProducerScheduleUpdate     string      `json:"last_producer_schedule_update"`
-	LastPervoteBucketFill          Int64       `json:"last_pervote_bucket_fill"`
+	LastProducerScheduleUpdate     JSONTime    `json:"last_producer_schedule_update"`
+	LastPervoteBucketFill          JSONTime    `json:"last_pervote_bucket_fill"`
 	PervoteBucket                  int         `json:"pervote_bucket"`
 	PerblockBucket                 int         `json:"perblock_bucket"`
 	TotalUnpaidBlocks              int         `json:"total_unpaid_blocks"`
 	TotalActivatedStake            Int64       `json:"total_activated_stake"`
-	ThreshActivatedStakeTime       Int64       `json:"thresh_activated_stake_time"`
+	ThreshActivatedStakeTime       JSONTime    `json:"thresh_activated_stake_time"`
 	LastProducerScheduleSize       int         `json:"last_producer_schedule_size"`
 	TotalProducerVoteWeight        JSONFloat64 `json:"total_producer_vote_weight"`
-	LastNameClose                  string      `json:"last_name_close"`
+	LastNameClose                  JSONTime    `json:"last_name_close"`
 }
 
 type Producer struct {

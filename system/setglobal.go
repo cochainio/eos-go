@@ -37,14 +37,26 @@ func NewSetMinActivatedStake(minStake int64) *eos.Action {
 	return NewSetGlobal("min_activated_stake", strconv.FormatInt(minStake, 10))
 }
 
+func NewSetUsecondsPerDay(usecondsPerDay int64) *eos.Action {
+	return NewSetGlobal("useconds_per_day", strconv.FormatInt(usecondsPerDay, 10))
+}
+
 func NewSetContinuousRate(rate float64) *eos.Action {
-	return NewSetGlobal("continuous_rate", strconv.FormatFloat(rate, 'f', -1, 64))
+	rate6 := int64(rate * 1e6)
+	return NewSetGlobal("continuous_rate", strconv.FormatInt(rate6, 10))
 }
 
 func NewSetToProducersRate(rate float64) *eos.Action {
-	return NewSetGlobal("to_producers_rate", strconv.FormatFloat(rate, 'f', -1, 64))
+	rate6 := int64(rate * 1e6)
+	return NewSetGlobal("to_producers_rate", strconv.FormatInt(rate6, 10))
 }
 
 func NewSetToBpayRate(rate float64) *eos.Action {
-	return NewSetGlobal("to_bpay_rate", strconv.FormatFloat(rate, 'f', -1, 64))
+	rate6 := int64(rate * 1e6)
+	return NewSetGlobal("to_bpay_rate", strconv.FormatInt(rate6, 10))
+}
+
+func NewSetToVoterBonusRate(rate float64) *eos.Action {
+	rate6 := int64(rate * 1e6)
+	return NewSetGlobal("to_voter_bonus_rate", strconv.FormatInt(rate6, 10))
 }

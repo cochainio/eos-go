@@ -130,6 +130,8 @@ func (e *Encoder) Encode(v interface{}) (err error) {
 		return e.writeCurrencyName(cv)
 	case SymbolCode:
 		return e.writeUint64(uint64(cv))
+	case Symbol:
+		return e.writeSymbol(cv)
 	case Asset:
 		return e.writeAsset(cv)
 	// case *OptionalProducerSchedule:
@@ -408,6 +410,16 @@ func (e *Encoder) writeCurrencyName(currency CurrencyName) (err error) {
 	copy(out, []byte(currency))
 
 	return e.toWriter(out)
+}
+
+func (e *Encoder) writeSymbol(symbol Symbol) (err error) {
+	encoderLog.Debug("write symbol", zap.Stringer("value", symbol))
+	e.writeByte(symbol.Precision)
+
+	s := make([]byte, 7, 7)
+
+	copy(s[:], []byte(symbol.Symbol))
+	return e.toWriter(s)
 }
 
 func (e *Encoder) writeAsset(asset Asset) (err error) {
