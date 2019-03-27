@@ -487,6 +487,11 @@ func (api *API) GetProducers(lower string, limit uint32, json bool) (out *Produc
 	return
 }
 
+func (api *API) GetBlockHeaderStateByNum(num uint32) (out *BlockHeaderStateResp, err error) {
+	err = api.call("chain", "get_block_header_state", M{"block_num_or_id": fmt.Sprintf("%d", num)}, &out)
+	return
+}
+
 func (api *API) GetBlockByNum(num uint32) (out *BlockResp, err error) {
 	err = api.call("chain", "get_block", M{"block_num_or_id": fmt.Sprintf("%d", num)}, &out)
 	//err = api.call("chain", "get_block", M{"block_num_or_id": num}, &out)

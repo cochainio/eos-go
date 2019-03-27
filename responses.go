@@ -51,6 +51,11 @@ type BlockResp struct {
 	BlockExtensions []*Extension `json:"block_extensions"`
 }
 
+type BlockHeaderStateResp struct { // TODO: other fields
+	BlockResp
+	ActiveSchedule ProducerSchedule `json:"active_schedule"`
+}
+
 type ScheduledTransactionsResp struct {
 	Transactions []ScheduledTransaction `json:"transactions"`
 	More         string                 `json:"more"`
