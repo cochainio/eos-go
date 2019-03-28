@@ -387,6 +387,7 @@ type JSONTime struct {
 }
 
 const JSONTimeFormat = "2006-01-02T15:04:05.000"
+const JSONTimeFormatWithoutMS = "2006-01-02T15:04:05"
 
 func (t JSONTime) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf("%q", t.Format(JSONTimeFormat))), nil
@@ -398,6 +399,9 @@ func (t *JSONTime) UnmarshalJSON(data []byte) (err error) {
 	}
 
 	t.Time, err = time.Parse(`"`+JSONTimeFormat+`"`, string(data))
+	if err != nil {
+		t.Time, err = time.Parse(`"`+JSONTimeFormatWithoutMS+`"`, string(data))
+	}
 	return err
 }
 
