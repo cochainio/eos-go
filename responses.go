@@ -45,10 +45,9 @@ type InfoResp struct {
 
 type BlockResp struct {
 	SignedBlock
-	ID              Checksum256  `json:"id"`
-	BlockNum        uint32       `json:"block_num"`
-	RefBlockPrefix  uint32       `json:"ref_block_prefix"`
-	BlockExtensions []*Extension `json:"block_extensions"`
+	ID             Checksum256 `json:"id"`
+	BlockNum       uint32      `json:"block_num"`
+	RefBlockPrefix uint32      `json:"ref_block_prefix"`
 }
 
 type BlockHeaderStateResp struct { // TODO: other fields
@@ -423,6 +422,13 @@ type ActionResp struct {
 type ActionsResp struct {
 	Actions               []ActionResp `json:"actions"`
 	LastIrreversibleBlock uint32       `json:"last_irreversible_block"`
+}
+type KeyAccountsResp struct {
+	AccountNames []string `json:"account_names"`
+}
+
+type ControlledAccountsResp struct {
+	ControlledAccounts []string `json:"controlled_accounts"`
 }
 
 type GetCurrencyStatsResp struct {

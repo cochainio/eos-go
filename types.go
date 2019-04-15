@@ -8,12 +8,16 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/cochainio/eos-go/ecc"
 )
+
+var symbolRegex = regexp.MustCompile("^[0-9],[A-Z]{1,7}$")
+var symbolCodeRegex = regexp.MustCompile("^[A-Z]{1,7}$")
 
 // For reference:
 // https://github.com/mithrilcoin-io/EosCommander/blob/master/app/src/main/java/io/mithrilcoin/eoscommander/data/remote/model/types/EosByteWriter.java
@@ -90,19 +94,60 @@ func (c CompressionType) MarshalJSON() ([]byte, error) {
 }
 
 func (c *CompressionType) UnmarshalJSON(data []byte) error {
-	var s string
-	err := json.Unmarshal(data, &s)
-	if err != nil {
+	tryNext, err := c.tryUnmarshalJSONAsString(data)
+	if err != nil && !tryNext {
 		return err
 	}
 
+	if tryNext {
+		_, err := c.tryUnmarshalJSONAsUint8(data)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (c *CompressionType) tryUnmarshalJSONAsString(data []byte) (tryNext bool, err error) {
+	var s string
+	err = json.Unmarshal(data, &s)
+	if err != nil {
+		_, isTypeError := err.(*json.UnmarshalTypeError)
+
+		// Let's continue with next handler is we hit a type error, might be an integer...
+		return isTypeError, err
+	}
+
 	switch s {
+	case "none":
+		*c = CompressionNone
 	case "zlib":
 		*c = CompressionZlib
 	default:
-		*c = CompressionNone
+		return false, fmt.Errorf("unknown compression type %s", s)
 	}
-	return nil
+
+	return false, nil
+}
+
+func (c *CompressionType) tryUnmarshalJSONAsUint8(data []byte) (tryNext bool, err error) {
+	var s uint8
+	err = json.Unmarshal(data, &s)
+	if err != nil {
+		return false, err
+	}
+
+	switch s {
+	case 0:
+		*c = CompressionNone
+	case 1:
+		*c = CompressionZlib
+	default:
+		return false, fmt.Errorf("unknown compression type %d", s)
+	}
+
+	return false, nil
 }
 
 // CurrencyName
@@ -183,6 +228,75 @@ type ExtendedAsset struct {
 type Symbol struct {
 	Precision uint8
 	Symbol    string
+
+	// Caching of symbol code if it was computed once
+	symbolCode uint64
+}
+
+func NameToSymbol(name Name) (Symbol, error) {
+	symbol := Symbol{}
+	value, err := StringToName(string(name))
+	if err != nil {
+		return symbol, fmt.Errorf("name %s is invalid: %s", name, err)
+	}
+
+	symbol.Precision = uint8(value & 0xFF)
+	symbol.Symbol = SymbolCode(value >> 8).String()
+
+	return symbol, nil
+}
+
+func StringToSymbol(str string) (Symbol, error) {
+	symbol := Symbol{}
+	if !symbolRegex.MatchString(str) {
+		return symbol, fmt.Errorf("%s is not a valid symbol", str)
+	}
+
+	precision, _ := strconv.ParseUint(string(str[0]), 10, 8)
+
+	symbol.Precision = uint8(precision)
+	symbol.Symbol = str[2:]
+
+	return symbol, nil
+}
+
+func (s Symbol) SymbolCode() (SymbolCode, error) {
+	if s.symbolCode != 0 {
+		return SymbolCode(s.symbolCode), nil
+	}
+
+	symbolCode, err := StringToSymbolCode(s.Symbol)
+	if err != nil {
+		return 0, err
+	}
+
+	return SymbolCode(symbolCode), nil
+}
+
+func (s Symbol) MustSymbolCode() SymbolCode {
+	symbolCode, err := StringToSymbolCode(s.Symbol)
+	if err != nil {
+		panic("Invalid symbol code " + s.Symbol)
+	}
+
+	return symbolCode
+}
+
+func (s Symbol) ToUint64() (uint64, error) {
+	symbolCode, err := s.SymbolCode()
+	if err != nil {
+		return 0, fmt.Errorf("symbol %s is not a valid symbol code: %s", s.Symbol, err)
+	}
+
+	return uint64(symbolCode)<<8 | uint64(s.Precision), nil
+}
+
+func (s Symbol) ToName() (string, error) {
+	u, err := s.ToUint64()
+	if err != nil {
+		return "", err
+	}
+	return NameToString(u), nil
 }
 
 func (s Symbol) String() string {
@@ -190,6 +304,53 @@ func (s Symbol) String() string {
 }
 
 type SymbolCode uint64
+
+func NameToSymbolCode(name Name) (SymbolCode, error) {
+	value, err := StringToName(string(name))
+	if err != nil {
+		return 0, fmt.Errorf("name %s is invalid: %s", name, err)
+	}
+
+	return SymbolCode(value), nil
+}
+
+func StringToSymbolCode(str string) (SymbolCode, error) {
+	if len(str) > 7 {
+		return 0, fmt.Errorf("string is too long to be a valid symbol_code")
+	}
+
+	var symbolCode uint64
+	for i := len(str) - 1; i >= 0; i-- {
+		if str[i] < 'A' || str[i] > 'Z' {
+			return 0, fmt.Errorf("only uppercase letters allowed in symbol_code string")
+		}
+
+		symbolCode <<= 8
+		symbolCode = symbolCode | uint64(str[i])
+	}
+
+	return SymbolCode(symbolCode), nil
+}
+
+func (sc SymbolCode) ToName() string {
+	return NameToString(uint64(sc))
+}
+
+func (sc SymbolCode) String() string {
+	builder := strings.Builder{}
+
+	symbolCode := uint64(sc)
+	for i := 0; i < 7; i++ {
+		if symbolCode == 0 {
+			return builder.String()
+		}
+
+		builder.WriteByte(byte(symbolCode & 0xFF))
+		symbolCode >>= 8
+	}
+
+	return builder.String()
+}
 
 // EOSSymbol represents the standard EOS symbol on the chain.  It's
 // here just to speed up things.
@@ -549,7 +710,7 @@ type BlockTimestamp struct {
 	time.Time
 }
 
-const BlockTimestampFormat = "2006-01-02T15:04:05"
+const BlockTimestampFormat = "2006-01-02T15:04:05.999"
 
 func (t BlockTimestamp) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf("%q", t.Format(BlockTimestampFormat))), nil
