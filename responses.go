@@ -110,7 +110,6 @@ type ActionTrace struct {
 	Elapsed       int            `json:"elapsed"`
 	CPUUsage      int            `json:"cpu_usage"`
 	Console       string         `json:"console"`
-	TotalCPUUsage int            `json:"total_cpu_usage"`
 	TransactionID Checksum256    `json:"trx_id"`
 	InlineTraces  []*ActionTrace `json:"inline_traces"`
 }
@@ -290,19 +289,33 @@ type GetRequiredKeysResp struct {
 // PushTransactionFullResp unwraps the responses from a successful `push_transaction`.
 // FIXME: REVIEW the actual output, things have moved here.
 type PushTransactionFullResp struct {
-	StatusCode    string
 	TransactionID string               `json:"transaction_id"`
 	Processed     TransactionProcessed `json:"processed"` // WARN: is an `fc::variant` in server..
-	BlockID       string               `json:"block_id"`
-	BlockNum      uint32               `json:"block_num"`
 }
 
 // TODO: libraries/chain/include/eosio/chain/trace.hpp: struct transaction_trace
 type TransactionProcessed struct {
-	Status               string      `json:"status"`
-	ID                   Checksum256 `json:"id"`
-	ActionTraces         []Trace     `json:"action_traces"`
-	DeferredTransactions []string    `json:"deferred_transactions"` // that's not right... dig to find what's there..
+	ID        Checksum256 `json:"id"`
+	BlockNum  uint32      `json:"block_num"`
+	BlockTime JSONTime    `json:"block_time"`
+	BlockID   string      `json:"block_id"`
+	Receipt struct {
+		Status           TransactionStatus `json:"status"`
+		CPUUsageMicrosec int               `json:"cpu_usage_us"`
+		NetUsageWords    int               `json:"net_usage_words"`
+	} `json:"receipt"`
+	Elapsed      int64         `json:"elapsed"`
+	NetUsage     uint64        `json:"net_usage"`
+	Scheduled    bool          `json:"scheduled"`
+	ActionTraces []ActionTrace `json:"action_traces"`
+	Except       *FCException  `json:"except"`
+}
+
+type FCException struct {
+	Code    int64           `json:"code"`
+	Name    string          `json:"name"`
+	Message string          `json:"message"`
+	Stack   json.RawMessage `json:"stack"`
 }
 
 type Trace struct {

@@ -19,7 +19,7 @@ func NewSetContract(account eos.AccountName, wasmPath, abiPath string) (out []*e
 		return nil, err
 	}
 
-	return NewSetContractFromBytes(account, codeContent, abiContent)
+	return []*eos.Action{codeAction, abiAction}, nil
 }
 
 func NewSetContractFromBytes(account eos.AccountName, codeContent, abiContent []byte) (out []*eos.Action, err error) {
