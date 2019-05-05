@@ -14,7 +14,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cochainio/eos-go/ecc"
+	"github.com/eoscochain/eos-go/ecc"
 )
 
 type API struct {

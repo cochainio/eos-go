@@ -1,6 +1,6 @@
 package token
 
-import eos "github.com/cochainio/eos-go"
+import eos "github.com/eoscochain/eos-go"
 
 var AN = eos.AN
 var PN = eos.PN

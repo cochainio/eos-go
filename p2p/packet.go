@@ -1,7 +1,7 @@
 package p2p
 
 import (
-	"github.com/cochainio/eos-go"
+	"github.com/eoscochain/eos-go"
 )
 
 type Envelope struct {

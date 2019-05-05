@@ -7,7 +7,7 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/cochainio/eos-go"
+	"github.com/eoscochain/eos-go"
 )
 
 type Proxy struct {

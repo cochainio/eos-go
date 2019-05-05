@@ -1,6 +1,6 @@
 package system
 
-import eos "github.com/cochainio/eos-go"
+import eos "github.com/eoscochain/eos-go"
 
 // BlockchainParameters are all the params we can set through `setparams`.
 type BlockchainParameters struct {

@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/cochainio/eos-go"
+	"github.com/eoscochain/eos-go"
 	"github.com/davecgh/go-spew/spew"
 )
 

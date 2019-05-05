@@ -1,7 +1,7 @@
 package msig
 
 import (
-	eos "github.com/cochainio/eos-go"
+	eos "github.com/eoscochain/eos-go"
 )
 
 // NewExec returns a `exec` action that lives on the

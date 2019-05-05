@@ -9,7 +9,7 @@ import (
 
 	"time"
 
-	"github.com/cochainio/eos-go/ecc"
+	"github.com/eoscochain/eos-go/ecc"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

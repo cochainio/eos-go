@@ -1,7 +1,7 @@
 package system
 
 import (
-	eos "github.com/cochainio/eos-go"
+	eos "github.com/eoscochain/eos-go"
 )
 
 // NewRefund returns a `refund` action that lives on the

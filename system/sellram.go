@@ -1,7 +1,7 @@
 package system
 
 import (
-	eos "github.com/cochainio/eos-go"
+	eos "github.com/eoscochain/eos-go"
 )
 
 // NewSellRAM will sell at current market price a given number of

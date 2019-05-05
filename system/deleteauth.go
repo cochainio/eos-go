@@ -1,6 +1,6 @@
 package system
 
-import "github.com/cochainio/eos-go"
+import "github.com/eoscochain/eos-go"
 
 // NewDeleteAuth creates an action from the `eosio.system` contract
 // called `deleteauth`.

@@ -1,7 +1,7 @@
 package system
 
 import (
-	"github.com/cochainio/eos-go"
+	"github.com/eoscochain/eos-go"
 )
 
 func NewInit(symbol string, precision uint8) *eos.Action {

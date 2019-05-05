@@ -1,7 +1,7 @@
 package forum
 
 import (
-	eos "github.com/cochainio/eos-go"
+	eos "github.com/eoscochain/eos-go"
 )
 
 // NewVote is an action representing a simple vote to be broadcast

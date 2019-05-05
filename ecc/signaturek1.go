@@ -1,8 +1,8 @@
 package ecc
 
 import (
-	"github.com/cochainio/eos-go/btcsuite/btcd/btcec"
-	"github.com/cochainio/eos-go/btcsuite/btcutil/base58"
+	"github.com/eoscochain/eos-go/btcsuite/btcd/btcec"
+	"github.com/eoscochain/eos-go/btcsuite/btcutil/base58"
 )
 
 type innerK1Signature struct {

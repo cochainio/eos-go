@@ -1,7 +1,7 @@
 package eos
 
 import (
-	"github.com/cochainio/eos-go/eoserr"
+	"github.com/eoscochain/eos-go/eoserr"
 	"fmt"
 	"strings"
 )

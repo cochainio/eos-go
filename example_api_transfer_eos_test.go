@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"os"
 
-	eos "github.com/cochainio/eos-go"
-	"github.com/cochainio/eos-go/token"
+	eos "github.com/eoscochain/eos-go"
+	"github.com/eoscochain/eos-go/token"
 )
 
 func ExampleAPI_PushTransaction_transfer_EOS() {

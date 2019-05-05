@@ -1,7 +1,7 @@
 package system
 
 import (
-	eos "github.com/cochainio/eos-go"
+	eos "github.com/eoscochain/eos-go"
 )
 
 func NewBuyRAMQuantity(payer, receiver eos.AccountName, eosQuantity uint64) *eos.Action {

@@ -1,6 +1,6 @@
 package forum
 
-import eos "github.com/cochainio/eos-go"
+import eos "github.com/eoscochain/eos-go"
 
 func init() {
 	eos.RegisterAction(ForumAN, ActN("clnproposal"), CleanProposal{})

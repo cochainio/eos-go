@@ -1,7 +1,7 @@
 package msig
 
 import (
-	eos "github.com/cochainio/eos-go"
+	eos "github.com/eoscochain/eos-go"
 )
 
 // NewCancel returns a `cancel` action that lives on the

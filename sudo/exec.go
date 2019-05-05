@@ -1,7 +1,7 @@
 package sudo
 
 import (
-	eos "github.com/cochainio/eos-go"
+	eos "github.com/eoscochain/eos-go"
 )
 
 // NewExec creates an `exec` action, found in the `eosio.wrap`

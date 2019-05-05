@@ -3,7 +3,7 @@ package system
 import (
 	"strconv"
 
-	"github.com/cochainio/eos-go"
+	"github.com/eoscochain/eos-go"
 )
 
 func NewSetGlobal(name, value string) *eos.Action {

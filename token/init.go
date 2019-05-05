@@ -1,6 +1,6 @@
 package token
 
-import "github.com/cochainio/eos-go"
+import "github.com/eoscochain/eos-go"
 
 func init() {
 	eos.RegisterAction(AN("eosio.token"), ActN("transfer"), Transfer{})
